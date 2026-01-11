@@ -28,7 +28,7 @@ pub fn setup_starfield(
 
 
     let mut rng = rand::thread_rng();
-    let star_count = 1000;
+    let star_count = 100;
     let field_size = 50.0; // Size of the starfield cube
     
     // Create a small sphere mesh for stars
@@ -38,7 +38,7 @@ pub fn setup_starfield(
     for _ in 0..star_count {
         let x = rng.gen_range(-field_size..field_size);
         let y = rng.gen_range(-field_size..field_size);
-        let z = rng.gen_range(-field_size..field_size);
+        let z = rng.gen_range(-field_size..-5.0);
         
         // Vary star brightness slightly
         let brightness = rng.gen_range(0.5..1.0);

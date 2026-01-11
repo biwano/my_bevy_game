@@ -1,7 +1,8 @@
 use bevy::prelude::*;
+use crate::projectile::Projectile;
 
 #[derive(Resource)]
-pub struct SpaceshipEntity(Entity);
+pub struct SpaceshipEntity(pub Entity);
 
 pub fn setup_ship(
     mut commands: Commands,
@@ -13,7 +14,7 @@ pub fn setup_ship(
     let spaceship_entity = commands.spawn(Transform {
         translation: Vec3::new(0.0, 0.0, 0.0),
         rotation: Quat::IDENTITY,
-        scale: Vec3::splat(0.02), // Scale to 1/100th size
+        scale: Vec3::splat(0.01), // Scale to 1/100th size
     }).id();
     scene_spawner.spawn_as_child(spaceship_handle, spaceship_entity);
     
@@ -51,6 +52,37 @@ pub fn move_spaceship(
         }
 
         transform.translation += movement;
+    }
+}
+
+pub fn spawn_projectile(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    spaceship_entity: Res<SpaceshipEntity>,
+    transforms: Query<&Transform>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Check if space was just pressed (not held)
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        // Get spaceship position
+        if let Ok(spaceship_transform) = transforms.get(spaceship_entity.0) {
+            // Create a small sphere for the projectile
+            let projectile_mesh = meshes.add(Sphere::new(0.03));
+            let projectile_material = materials.add(StandardMaterial {
+                base_color: Color::srgb(0.0, 1.0, 1.0), // Blue projectile
+                emissive: Color::srgb(1.0, 1.0, 0.0).into(),
+                ..default()
+            });
+            
+            // Spawn projectile at spaceship position
+            commands.spawn((
+                Projectile,
+                Mesh3d(projectile_mesh),
+                MeshMaterial3d(projectile_material),
+                Transform::from_translation(spaceship_transform.translation),
+            ));
+        }
     }
 }
 

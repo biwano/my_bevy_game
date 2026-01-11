@@ -1,5 +1,7 @@
 mod ship;
 mod starfield;
+mod projectile;
+mod target;
 
 use bevy::{
     color::palettes::css::*,
@@ -12,14 +14,16 @@ use bevy::{
     },
 };
 
-use ship::{move_spaceship, setup_ship};
+use ship::{move_spaceship, setup_ship, spawn_projectile};
 use starfield::{setup_starfield, move_stars, rotate_skybox};
+use projectile::{move_projectiles, despawn_out_of_bounds_projectiles};
+use target::{setup_targets, check_projectile_target_collisions};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, (setup, setup_ship, setup_starfield))
-        .add_systems(Update, (move_spaceship, move_stars, rotate_skybox))
+        .add_systems(Startup, (setup, setup_ship, setup_starfield, setup_targets))
+        .add_systems(Update, (move_spaceship, move_stars, rotate_skybox, spawn_projectile, move_projectiles, despawn_out_of_bounds_projectiles, check_projectile_target_collisions))
         .run();
 }
 
