@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::projectile::Projectile;
+use crate::movable::Movable;
 
 #[derive(Component)]
 pub struct Target {
@@ -8,7 +9,7 @@ pub struct Target {
 
 impl Default for Target {
     fn default() -> Self {
-        Self { hit_points: 100.0 }
+        Self { hit_points: 20.0 }
     }
 }
 
@@ -30,19 +31,39 @@ pub fn setup_targets(
     ];
     
     for position in positions.iter() {
-        // Create a unique material for each target (green when healthy)
-        let target_material = materials.add(StandardMaterial {
-            base_color: Color::srgb(0.0, 1.0, 0.0), // Green when healthy
-            ..default()
-        });
-        
-        commands.spawn((
-            Target::default(),
-            Mesh3d(cube_mesh.clone()),
-            MeshMaterial3d(target_material),
-            Transform::from_translation(*position),
-        ));
+        spawn_target(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            *position,
+            cube_mesh.clone(),
+        );
     }
+}
+
+fn spawn_target(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    position: Vec3,
+    cube_mesh: Handle<Mesh>,
+) {
+    // Create a unique material for each target (green when healthy)
+    let target_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.0, 1.0, 0.0), // Green when healthy
+        ..default()
+    });
+    
+    // Targets move slowly to the left (negative X direction)
+    let left_velocity = Vec3::new(-0.2, 0.0, 0.0);
+    
+    commands.spawn((
+        Target::default(),
+        Movable::with_velocity(left_velocity, 1.0), // No damping, constant velocity
+        Mesh3d(cube_mesh),
+        MeshMaterial3d(target_material),
+        Transform::from_translation(position),
+    ));
 }
 
 pub fn check_projectile_target_collisions(
@@ -92,10 +113,29 @@ pub fn update_target_colors(
 
 pub fn despawn_dead_targets(
     mut commands: Commands,
-    targets: Query<(Entity, &Target)>,
+    targets: Query<(Entity, &Target, &Transform), (With<Target>, Without<Projectile>)>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for (entity, target) in targets.iter() {
+    let cube_mesh = meshes.add(Cuboid::new(0.5, 0.5, 0.5));
+    
+    for (entity, target, _transform) in targets.iter() {
         if target.hit_points <= 0.0 {
+            // Spawn a new target at a random position on the right side
+            use rand::Rng;
+            let mut rng = rand::thread_rng();
+            let new_y = rng.gen_range(-2.0..2.0);
+            let new_position = Vec3::new(3.0, new_y, 0.0);
+            
+            spawn_target(
+                &mut commands,
+                &mut meshes,
+                &mut materials,
+                new_position,
+                cube_mesh.clone(),
+            );
+            
+            // Despawn the dead target
             commands.entity(entity).despawn();
         }
     }

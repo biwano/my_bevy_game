@@ -51,13 +51,23 @@ pub fn apply_acceleration_to_movable(
 }
 
 pub fn move_movable(
-    mut transforms: Query<&mut Transform>,
-    movables: Query<&Movable>,
+    mut movables: Query<(&mut Transform, &Movable)>,
     time: Res<Time>,
 ) {
-    for (mut transform, movable) in transforms.iter_mut().zip(movables.iter()) {
+    for (mut transform, movable) in movables.iter_mut() {
         // Update position based on velocity
         transform.translation += movable.velocity * time.delta_secs();
+    }
+}
+
+pub struct MovablePlugin;
+
+impl Plugin for MovablePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, (
+            apply_acceleration_to_movable,
+            move_movable,
+        ));
     }
 }
 
