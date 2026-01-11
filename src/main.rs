@@ -1,4 +1,5 @@
 mod ship;
+mod starfield;
 
 use bevy::{
     color::palettes::css::*,
@@ -12,12 +13,13 @@ use bevy::{
 };
 
 use ship::{move_spaceship, setup_ship};
+use starfield::{setup_starfield, move_stars, rotate_skybox};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, (setup, setup_ship))
-        .add_systems(Update, move_spaceship)
+        .add_systems(Startup, (setup, setup_ship, setup_starfield))
+        .add_systems(Update, (move_spaceship, move_stars, rotate_skybox))
         .run();
 }
 
