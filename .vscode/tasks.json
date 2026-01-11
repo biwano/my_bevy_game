@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "command": "cargo run",
+            "label": "rust: cargo run",
+            "presentation": {
+                "reveal": "always"
+              }
+        },
+    ]
+}
+
+
+
+

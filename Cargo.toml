@@ -1,11 +1,14 @@
 [package]
-name = "my_bevy_game"
+name = "the_game"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.17.3", features = ["dynamic_linking"] }
-log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+#argh = "0.1.13"
+bevy = { version = "0.17.3", features = ["dynamic_linking", "jpeg", "meshlet"] }
+#bytemuck = "1.24.0"
+#log = { version = "*", features = ["max_level_debug", "release_max_level_warn"] }
+#rand = "0.8"
 
 
 # Enable a small amount of optimization in the dev profile.
