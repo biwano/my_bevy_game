@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use crate::projectile::Projectile;
 use crate::movable::Movable;
 
+const TARGET_HIT_POINTS: f32 = 20.0;
+
 #[derive(Component)]
 pub struct Target {
     pub hit_points: f32,
@@ -9,7 +11,7 @@ pub struct Target {
 
 impl Default for Target {
     fn default() -> Self {
-        Self { hit_points: 20.0 }
+        Self { hit_points: TARGET_HIT_POINTS }
     }
 }
 
@@ -41,7 +43,7 @@ pub fn setup_targets(
     }
 }
 
-fn spawn_target(
+pub fn spawn_target(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
@@ -98,9 +100,9 @@ pub fn update_target_colors(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (target, material_handle) in targets.iter() {
-        // Calculate color based on hit points (0-100)
-        // Green when healthy (100 HP), red when dead (0 HP)
-        let health_ratio = (target.hit_points / 100.0).clamp(0.0, 1.0);
+        // Calculate color based on hit points
+        // Green when healthy (max HP), red when dead (0 HP)
+        let health_ratio = (target.hit_points / TARGET_HIT_POINTS).clamp(0.0, 1.0);
         let red = 1.0 - health_ratio;
         let green = health_ratio;
         
@@ -136,6 +138,40 @@ pub fn despawn_dead_targets(
             );
             
             // Despawn the dead target
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn despawn_out_of_bounds_targets(
+    mut commands: Commands,
+    targets: Query<(Entity, &Transform), (With<Target>, Without<Projectile>)>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let cube_mesh = meshes.add(Cuboid::new(0.5, 0.5, 0.5));
+    let left_boundary = -5.0; // Despawn targets that go too far to the left
+    
+    for (entity, transform) in targets.iter() {
+        let pos = transform.translation;
+        
+        // If target has moved off-screen to the left, despawn and respawn
+        if pos.x < left_boundary {
+            // Spawn a new target at a random position on the right side
+            use rand::Rng;
+            let mut rng = rand::thread_rng();
+            let new_y = rng.gen_range(-2.0..2.0);
+            let new_position = Vec3::new(3.0, new_y, 0.0);
+            
+            spawn_target(
+                &mut commands,
+                &mut meshes,
+                &mut materials,
+                new_position,
+                cube_mesh.clone(),
+            );
+            
+            // Despawn the out-of-bounds target
             commands.entity(entity).despawn();
         }
     }
