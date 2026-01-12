@@ -50,6 +50,29 @@ Or run the release version:
 cargo run --release
 ```
 
+## Project Structure
+
+```
+rusty_crew/
+├── assets/
+│   └── models/
+│       ├── glb files (3d models)
+├── src/
+│   ├── main.rs              # Main game entry point
+│   ├── movable.rs           # Movable entity components
+│   ├── projectile.rs        # Projectile system and components
+│   ├── ship.rs              # Ship entity and behavior
+│   ├── starfield.rs         # Starfield background system
+│   ├── target.rs            # Target entity and behavior
+│   └── weapons/
+│       ├── mod.rs           # Weapons module
+│       └── cannon.rs        # Cannon weapon implementation
+├── Cargo.toml               # Rust project dependencies and metadata
+├── Cargo.lock               # Locked dependency versions
+├── rust-toolchain.toml      # Rust toolchain version specification
+└── README.md                # This file
+```
+
 ## Troubleshooting
 
 ### Build Issues
