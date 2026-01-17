@@ -10,20 +10,61 @@ pub type ProjectileSpawner = fn(
     Vec3, // velocity
 );
 
+/// Type alias for mesh spawner functions
+pub type MeshSpawner = fn(
+    &mut Commands,
+    &Res<AssetServer>,
+    &mut ResMut<SceneSpawner>,
+    Entity, // parent entity
+    Vec3, // translation relative to parent
+);
+
 #[derive(Component)]
 pub struct Weapon {
     pub fire_cooldown_duration: f32,
     pub cooldown_timer: f32,
-    pub projectile_spawner: ProjectileSpawner,
+    pub projectile_spawner: Option<ProjectileSpawner>, // Optional projectile spawner function
+    pub mesh_spawner: Option<MeshSpawner>, // Optional mesh spawner function
 }
 
 impl Weapon {
-    pub fn new(fire_cooldown_duration: f32, projectile_spawner: ProjectileSpawner) -> Self {
+    pub fn new() -> Self {
         Self {
-            fire_cooldown_duration,
+            fire_cooldown_duration: 1.0, // Default 1 second cooldown
             cooldown_timer: 0.0,
-            projectile_spawner,
+            projectile_spawner: None,
+            mesh_spawner: None,
         }
+    }
+    
+    pub fn with_fire_cooldown(mut self, duration: f32) -> Self {
+        self.fire_cooldown_duration = duration;
+        self
+    }
+    
+    pub fn with_projectile_spawner(mut self, spawner: ProjectileSpawner) -> Self {
+        self.projectile_spawner = Some(spawner);
+        self
+    }
+    
+    pub fn with_mesh_spawner(mut self, spawner: MeshSpawner) -> Self {
+        self.mesh_spawner = Some(spawner);
+        self
+    }
+    
+    pub fn set_fire_cooldown(&mut self, duration: f32) -> &mut Self {
+        self.fire_cooldown_duration = duration;
+        self
+    }
+    
+    pub fn set_projectile_spawner(&mut self, spawner: ProjectileSpawner) -> &mut Self {
+        self.projectile_spawner = Some(spawner);
+        self
+    }
+    
+    pub fn set_mesh_spawner(&mut self, spawner: MeshSpawner) -> &mut Self {
+        self.mesh_spawner = Some(spawner);
+        self
     }
     
     pub fn can_fire(&self) -> bool {
@@ -72,13 +113,15 @@ pub fn activate_weapon(
                     let projectile_velocity = ship_movable.velocity + Vec3::new(forward_speed, 0.0, 0.0);
                     
                     // Spawn projectile using the weapon's projectile spawner
-                    (weapon.projectile_spawner)(
-                        &mut commands,
-                        &mut meshes,
-                        &mut materials,
-                        spaceship_transform.translation,
-                        projectile_velocity,
-                    );
+                    if let Some(spawner) = weapon.projectile_spawner {
+                        spawner(
+                            &mut commands,
+                            &mut meshes,
+                            &mut materials,
+                            spaceship_transform.translation,
+                            projectile_velocity,
+                        );
+                    }
                     
                     // Start cooldown
                     weapon.start_cooldown();

@@ -1,9 +1,30 @@
 use bevy::prelude::*;
 use crate::movable::Movable;
 use crate::weapons::cannon::create_cannon;
+use crate::weapons::weapon::Weapon;
 
 #[derive(Resource)]
 pub struct SpaceshipEntity(pub Entity);
+
+/// Attaches a weapon to a ship entity, including spawning the weapon mesh if available
+pub fn attach_weapon(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    scene_spawner: &mut ResMut<SceneSpawner>,
+    ship_entity: Entity,
+    weapon: Weapon,
+) {
+    // Store mesh spawner before moving weapon
+    let mesh_spawner = weapon.mesh_spawner;
+    
+    // Add weapon component to the ship entity
+    commands.entity(ship_entity).insert(weapon);
+    
+    // Spawn weapon mesh as a child of the ship using the weapon's mesh spawner
+    if let Some(spawner) = mesh_spawner {
+        spawner(commands, asset_server, scene_spawner, ship_entity, Vec3::ZERO);
+    }
+}
 
 pub fn setup_ship(
     mut commands: Commands,
@@ -12,6 +33,7 @@ pub fn setup_ship(
 ) {
     // Load and spawn spaceship at position (0, 0, 0), scaled to 1/100th size
     let spaceship_handle = asset_server.load("models/spaceship.glb#Scene0");
+    
     let spaceship_entity = commands.spawn((
         Transform {
             translation: Vec3::new(0.0, 0.0, 0.0),
@@ -19,9 +41,12 @@ pub fn setup_ship(
             scale: Vec3::splat(0.01), // Scale to 1/100th size
         },
         Movable::zero(0.95), // Start with zero velocity and acceleration, damping of 0.95
-        create_cannon(), // Cannon weapon
     )).id();
     scene_spawner.spawn_as_child(spaceship_handle, spaceship_entity);
+    
+    // Attach cannon weapon to the ship
+    let cannon_weapon = create_cannon();
+    attach_weapon(&mut commands, &asset_server, &mut scene_spawner, spaceship_entity, cannon_weapon);
     
     // Store spaceship entity for movement system
     commands.insert_resource(SpaceshipEntity(spaceship_entity));
