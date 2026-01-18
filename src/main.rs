@@ -1,3 +1,4 @@
+mod hud;
 mod movable;
 mod projectiles;
 mod ship;
@@ -16,6 +17,7 @@ use bevy::{
     },
 };
 
+use hud::HudPlugin;
 use movable::MovablePlugin;
 use projectiles::ProjectilePlugin;
 use ship::ShipPlugin;
@@ -26,6 +28,7 @@ use weapons::WeaponPlugin;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(HudPlugin)
         .add_plugins(MovablePlugin)
         .add_plugins(ShipPlugin)
         .add_plugins(WeaponPlugin)
@@ -51,16 +54,5 @@ fn setup(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(0.0, 0.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-    ));
-
-    // Text used to show controls
-    commands.spawn((
-        Text::default(),
-        Node {
-            position_type: PositionType::Absolute,
-            top: px(12),
-            left: px(12),
-            ..default()
-        },
     ));
 }

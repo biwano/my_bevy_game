@@ -1,3 +1,4 @@
+use crate::hud::PlayerScore;
 use crate::movable::Movable;
 use crate::projectiles::Projectile;
 use bevy::prelude::*;
@@ -7,12 +8,14 @@ const TARGET_HIT_POINTS: f32 = 20.0;
 #[derive(Component)]
 pub struct Target {
     pub hit_points: f32,
+    pub score: u32,
 }
 
 impl Default for Target {
     fn default() -> Self {
         Self {
             hit_points: TARGET_HIT_POINTS,
+            score: 100, // Default score for destroying a target
         }
     }
 }
@@ -35,19 +38,12 @@ pub fn setup_targets(
     ];
 
     for position in positions.iter() {
-        spawn_target(
-            &mut commands,
-            &mut meshes,
-            &mut materials,
-            *position,
-            cube_mesh.clone(),
-        );
+        spawn_target(&mut commands, &mut materials, *position, cube_mesh.clone());
     }
 }
 
 pub fn spawn_target(
     commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     position: Vec3,
     cube_mesh: Handle<Mesh>,
@@ -120,11 +116,15 @@ pub fn despawn_dead_targets(
     targets: Query<(Entity, &Target, &Transform), (With<Target>, Without<Projectile>)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut player_score: ResMut<PlayerScore>,
 ) {
     let cube_mesh = meshes.add(Cuboid::new(0.5, 0.5, 0.5));
 
     for (entity, target, _transform) in targets.iter() {
         if target.hit_points <= 0.0 {
+            // Add score to player
+            player_score.score += target.score;
+
             // Spawn a new target at a random position on the right side
             use rand::Rng;
             let mut rng = rand::thread_rng();
@@ -133,7 +133,6 @@ pub fn despawn_dead_targets(
 
             spawn_target(
                 &mut commands,
-                &mut meshes,
                 &mut materials,
                 new_position,
                 cube_mesh.clone(),
@@ -167,7 +166,6 @@ pub fn despawn_out_of_bounds_targets(
 
             spawn_target(
                 &mut commands,
-                &mut meshes,
                 &mut materials,
                 new_position,
                 cube_mesh.clone(),
