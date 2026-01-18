@@ -10,6 +10,7 @@ pub type ProjectileSpawner = fn(
     &mut ResMut<SceneSpawner>,
     Vec3, // position
     Vec3, // velocity
+    Quat, // rotation
 );
 
 /// Type alias for mesh spawner functions
@@ -175,6 +176,7 @@ pub fn activate_weapon(
                             &mut scene_spawner,
                             projectile_position,
                             projectile_velocity,
+                            spaceship_transform.rotation,
                         );
                     }
 

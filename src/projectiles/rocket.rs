@@ -11,16 +11,19 @@ pub fn spawn_rocket_projectile(
     scene_spawner: &mut ResMut<SceneSpawner>,
     position: Vec3,
     velocity: Vec3,
+    rotation: Quat,
 ) {
     let rocket_scene_handle = asset_server.load("models/projectiles/rocket.glb#Scene0");
 
     let rocket_entity = commands
         .spawn((
             Projectile { damage: 25.0 }, // Rockets do more damage than cannon balls
-            Movable::with_velocity(velocity, 1.0),
-            Transform::from_translation(position)
-                .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)) // Rotate to face forward
-                .with_scale(Vec3::splat(0.0002)), // Scale down the rocket
+            Movable::with_velocity(velocity, 0.99),
+            Transform {
+                translation: position,
+                rotation: rotation * Quat::from_rotation_y(std::f32::consts::FRAC_PI_2), // Apply ship rotation + rocket's forward rotation
+                scale: Vec3::splat(0.0002), // Scale down the rocket
+            },
         ))
         .id();
 
