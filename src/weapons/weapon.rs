@@ -6,6 +6,8 @@ pub type ProjectileSpawner = fn(
     &mut Commands,
     &mut ResMut<Assets<Mesh>>,
     &mut ResMut<Assets<StandardMaterial>>,
+    &Res<AssetServer>,
+    &mut ResMut<SceneSpawner>,
     Vec3, // position
     Vec3, // velocity
 );
@@ -120,6 +122,8 @@ pub fn activate_weapon(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+    mut scene_spawner: ResMut<SceneSpawner>,
 ) {
     // Check if space is pressed (can be held down)
     if keyboard_input.pressed(KeyCode::Space) {
@@ -132,15 +136,20 @@ pub fn activate_weapon(
                     transforms.get(spaceship_entity.0),
                     movables.get(spaceship_entity.0),
                 ) {
-                    // Calculate projectile velocity: ship velocity + forward velocity (to the right)
+                    // Calculate projectile velocity: ship velocity + forward velocity (rotated with ship)
                     let forward_speed = 10.0;
-                    let projectile_velocity =
-                        ship_movable.velocity + Vec3::new(forward_speed, 0.0, 0.0);
+                    let forward_direction =
+                        spaceship_transform.rotation * Vec3::new(forward_speed, 0.0, 0.0);
+                    let projectile_velocity = ship_movable.velocity + forward_direction;
 
-                    // Calculate weapon position and projectile spawn position
-                    let weapon_position =
-                        spaceship_transform.translation + weapon.weapon_position_offset;
-                    let projectile_position = weapon_position + weapon.projectile_spawn_offset;
+                    // Calculate weapon position and projectile spawn position (rotated with ship)
+                    let rotated_weapon_offset =
+                        spaceship_transform.rotation * weapon.weapon_position_offset;
+                    let rotated_projectile_offset =
+                        spaceship_transform.rotation * weapon.projectile_spawn_offset;
+
+                    let weapon_position = spaceship_transform.translation + rotated_weapon_offset;
+                    let projectile_position = weapon_position + rotated_projectile_offset;
 
                     // Spawn projectile using the weapon's projectile spawner
                     if let Some(spawner) = weapon.projectile_spawner {
@@ -148,6 +157,8 @@ pub fn activate_weapon(
                             &mut commands,
                             &mut meshes,
                             &mut materials,
+                            &asset_server,
+                            &mut scene_spawner,
                             projectile_position,
                             projectile_velocity,
                         );

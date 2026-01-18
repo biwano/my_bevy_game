@@ -39,7 +39,7 @@ pub fn setup_ship(
     mut scene_spawner: ResMut<SceneSpawner>,
 ) {
     // Load and spawn spaceship at position (0, 0, 0), scaled to 1/100th size
-    let spaceship_handle = asset_server.load("models/spaceship.glb#Scene0");
+    let spaceship_handle = asset_server.load("models/ships/spaceship.glb#Scene0");
 
     let spaceship_entity = commands
         .spawn((
