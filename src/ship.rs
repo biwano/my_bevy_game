@@ -1,5 +1,6 @@
 use crate::movable::Movable;
 use crate::weapons::cannon::create_cannon;
+use crate::weapons::create_rocket_launcher;
 use crate::weapons::weapon::Weapon;
 use bevy::prelude::*;
 
@@ -55,12 +56,13 @@ pub fn setup_ship(
 
     // Attach cannon weapon to the ship
     let cannon_weapon = create_cannon(Vec3::new(0.0, 0.0, 0.0)); // Position cannon at ship origin
+    let rocket_weapon = create_rocket_launcher(Vec3::new(0.0, 0.0, 0.0)); // Position rocket launcher at ship origin
     attach_weapon(
         &mut commands,
         &asset_server,
         &mut scene_spawner,
         spaceship_entity,
-        cannon_weapon,
+        rocket_weapon,
     );
 
     // Store spaceship entity for movement system

@@ -29,6 +29,7 @@ pub struct Weapon {
     pub mesh_spawner: Option<MeshSpawner>,             // Optional mesh spawner function
     pub weapon_position_offset: Vec3, // Offset from ship where weapon is positioned
     pub projectile_spawn_offset: Vec3, // Offset from weapon position where projectiles spawn
+    pub projectile_spawn_speed_vector: Vec3, // Base speed vector for projectiles (before rotation)
 }
 
 impl Weapon {
@@ -40,6 +41,7 @@ impl Weapon {
             mesh_spawner: None,
             weapon_position_offset: Vec3::ZERO, // Default: weapon at ship origin
             projectile_spawn_offset: Vec3::ZERO, // Default: spawn at weapon position
+            projectile_spawn_speed_vector: Vec3::new(10.0, 0.0, 0.0), // Default: 10 units forward
         }
     }
 
@@ -68,6 +70,11 @@ impl Weapon {
         self
     }
 
+    pub fn with_projectile_spawn_speed_vector(mut self, speed_vector: Vec3) -> Self {
+        self.projectile_spawn_speed_vector = speed_vector;
+        self
+    }
+
     pub fn set_fire_cooldown(&mut self, duration: f32) -> &mut Self {
         self.fire_cooldown_duration = duration;
         self
@@ -90,6 +97,11 @@ impl Weapon {
 
     pub fn set_projectile_spawn_offset(&mut self, offset: Vec3) -> &mut Self {
         self.projectile_spawn_offset = offset;
+        self
+    }
+
+    pub fn set_projectile_spawn_speed_vector(&mut self, speed_vector: Vec3) -> &mut Self {
+        self.projectile_spawn_speed_vector = speed_vector;
         self
     }
 
@@ -136,10 +148,9 @@ pub fn activate_weapon(
                     transforms.get(spaceship_entity.0),
                     movables.get(spaceship_entity.0),
                 ) {
-                    // Calculate projectile velocity: ship velocity + forward velocity (rotated with ship)
-                    let forward_speed = 10.0;
+                    // Calculate projectile velocity: ship velocity + weapon's spawn speed vector (rotated with ship)
                     let forward_direction =
-                        spaceship_transform.rotation * Vec3::new(forward_speed, 0.0, 0.0);
+                        spaceship_transform.rotation * weapon.projectile_spawn_speed_vector;
                     let projectile_velocity = ship_movable.velocity + forward_direction;
 
                     // Calculate weapon position and projectile spawn position (rotated with ship)

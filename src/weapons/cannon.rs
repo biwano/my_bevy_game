@@ -10,6 +10,7 @@ pub fn create_cannon(weapon_position: Vec3) -> Weapon {
         .with_mesh_spawner(spawn_cannon_mesh)
         .with_weapon_position_offset(weapon_position)
         .with_projectile_spawn_offset(Vec3::new(0.15, 0.05, 0.0)) // Initial position of the projectile relative to the weapon
+        .with_projectile_spawn_speed_vector(Vec3::new(15.0, 0.0, 0.0)) // Cannon balls are fast
 }
 
 /// Spawns the cannon mesh as a child of the given parent entity

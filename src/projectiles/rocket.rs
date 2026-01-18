@@ -19,8 +19,8 @@ pub fn spawn_rocket_projectile(
             Projectile { damage: 25.0 }, // Rockets do more damage than cannon balls
             Movable::with_velocity(velocity, 1.0),
             Transform::from_translation(position)
-                .with_rotation(Quat::from_rotation_y(std::f32::consts::PI)) // Rotate to face forward
-                .with_scale(Vec3::splat(0.5)), // Scale down the rocket
+                .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)) // Rotate to face forward
+                .with_scale(Vec3::splat(0.0002)), // Scale down the rocket
         ))
         .id();
 

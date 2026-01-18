@@ -6,9 +6,10 @@ use bevy::prelude::*;
 /// Rocket launchers have no mesh and fire rockets with longer cooldown
 pub fn create_rocket_launcher(weapon_position: Vec3) -> Weapon {
     Weapon::new()
-        .with_fire_cooldown(1.0) // Longer cooldown than cannon
+        .with_fire_cooldown(0.2) // Longer cooldown than cannon
         .with_projectile_spawner(spawn_rocket_projectile)
         // No mesh spawner - rocket launcher has no visible mesh
         .with_weapon_position_offset(weapon_position)
-        .with_projectile_spawn_offset(Vec3::new(0.2, 0.0, 0.0)) // Slightly further forward than cannon
+        .with_projectile_spawn_offset(Vec3::new(-0.05, -0.05, 0.0))
+        .with_projectile_spawn_speed_vector(Vec3::new(0.0, -0.1, 0.0)) // Rockets are slower than cannon balls
 }
