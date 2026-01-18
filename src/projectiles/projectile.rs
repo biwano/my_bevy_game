@@ -25,3 +25,11 @@ pub fn despawn_out_of_bounds_projectiles(
         }
     }
 }
+
+pub struct ProjectilePlugin;
+
+impl Plugin for ProjectilePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, despawn_out_of_bounds_projectiles);
+    }
+}

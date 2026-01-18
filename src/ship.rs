@@ -4,6 +4,21 @@ use crate::weapons::create_rocket_launcher;
 use crate::weapons::weapon::{Weapon, WeaponMesh};
 use bevy::prelude::*;
 
+pub struct ShipPlugin;
+
+impl Plugin for ShipPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup_ship).add_systems(
+            Update,
+            (
+                set_ship_acceleration,
+                set_ship_rotation,
+                switch_weapon_input,
+            ),
+        );
+    }
+}
+
 #[derive(Resource)]
 pub struct SpaceshipEntity(pub Entity);
 
